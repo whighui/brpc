@@ -16,12 +16,15 @@
 # under the License.
 
 cmake_minimum_required(VERSION 2.8.10)
+#项目名称以及语言
 project(brpc C CXX)
 
+#编译选项 是否支持 glog
 option(WITH_GLOG "With glog" OFF)
 option(WITH_MESALINK "With MesaLink" OFF)
 option(DEBUG "Print debug logs" OFF)
 option(WITH_DEBUG_SYMBOLS "With debug symbols" ON)
+#是否支持 Thrift 框架协议
 option(WITH_THRIFT "With thrift framed protocol supported" OFF)
 option(WITH_SNAPPY "With snappy" OFF)
 option(WITH_RDMA "With RDMA" OFF)
@@ -36,8 +39,10 @@ endif()
 
 set(BRPC_VERSION 1.5.0)
 
+#打包为 Debian 包
 SET(CPACK_GENERATOR "DEB")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "brpc authors")
+#包含 CPack 模块
 INCLUDE(CPack)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -204,7 +209,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(OPENSSL_ROOT_DIR
-        "/usr/local/opt/openssl"    # Homebrew installed OpenSSL
+        "/opt/homebrew/Cellar/openssl@3/3.4.1"    # Homebrew installed OpenSSL
         )
 endif()
 
@@ -418,6 +423,7 @@ if(WITH_THRIFT)
 else()
     # Remove thrift sources
     foreach(v ${THRIFT_SOURCES})
+        #如果不支持thrift 则移除thrift支持
         list(REMOVE_ITEM BRPC_SOURCES ${v})
     endforeach()
     set(THRIFT_SOURCES "")
@@ -433,6 +439,7 @@ set(MCPACK2PB_SOURCES
     ${PROJECT_SOURCE_DIR}/src/mcpack2pb/parser.cpp
     ${PROJECT_SOURCE_DIR}/src/mcpack2pb/serializer.cpp)
 
+#自定义 Proto 编译模块
 include(CompileProto)
 set(PROTO_FILES idl_options.proto
                 brpc/rtmp.proto
@@ -454,6 +461,8 @@ set(PROTO_FILES idl_options.proto
                 brpc/proto_base.proto)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/output/include/brpc)
 set(PROTOC_FLAGS ${PROTOC_FLAGS} -I${PROTOBUF_INCLUDE_DIR})
+
+#自定义 Proto 编译模块  编译.proto文件
 compile_proto(PROTO_HDRS PROTO_SRCS ${PROJECT_BINARY_DIR}
                                     ${PROJECT_BINARY_DIR}/output/include
                                     ${PROJECT_SOURCE_DIR}/src
